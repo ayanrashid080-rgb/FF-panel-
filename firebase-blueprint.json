@@ -1,0 +1,64 @@
+{
+  "entities": {
+    "LoginSession": {
+      "title": "LoginSession",
+      "description": "Consented client VIP key login record containing verified IP address and device metadata.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the authenticated client."
+        },
+        "userEmail": {
+          "type": "string",
+          "description": "Verified email address of the authenticated client."
+        },
+        "activationKey": {
+          "type": "string",
+          "description": "VIP activation key used to unlock the overlay."
+        },
+        "ipAddress": {
+          "type": "string",
+          "description": "Device IP address shared after explicit user consent."
+        },
+        "hardwareId": {
+          "type": "string",
+          "description": "Client device architecture and hardware identifier."
+        },
+        "consentStatus": {
+          "type": "string",
+          "enum": ["ALLOWED"],
+          "description": "Explicit user consent state."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when session was recorded (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when session was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "userEmail",
+        "activationKey",
+        "ipAddress",
+        "hardwareId",
+        "consentStatus",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/login_sessions/{sessionId}": {
+      "schema": {
+        "$ref": "#/entities/LoginSession"
+      },
+      "description": "Consented VIP key login sessions visible to the owning user and verified admin."
+    }
+  }
+}

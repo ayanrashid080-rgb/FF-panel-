@@ -1,0 +1,6 @@
+{
+  "name": "Nexus Overlay",
+  "description": "Cyberpunk Android Mod Menu & Tactical Game Utility Overlay Simulator with VIP activation, draggable floating bubble, live ESP & FOV HUD, and Python memory-hook terminal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

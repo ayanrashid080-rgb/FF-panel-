@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+             request.auth.token.email_verified == true &&
+             request.auth.token.email == 'ayanrashid080@gmail.com';
+    }
+
+    function isValidLoginSession(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userEmail is string && data.userEmail.size() >= 3 && data.userEmail.size() <= 254 &&
+             data.activationKey is string && data.activationKey.size() >= 8 && data.activationKey.size() <= 64 &&
+             data.ipAddress is string && data.ipAddress.size() >= 3 && data.ipAddress.size() <= 64 &&
+             data.hardwareId is string && data.hardwareId.size() >= 3 && data.hardwareId.size() <= 64 &&
+             data.consentStatus == 'ALLOWED' &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /login_sessions/{sessionId} {
+      allow get: if isSignedIn() && isValidId(sessionId) &&
+                    (existing().userId == request.auth.uid || isAdmin());
+
+      allow list: if isSignedIn() &&
+                     (resource.data.userId == request.auth.uid || isAdmin());
+
+      allow create: if isSignedIn() &&
+                       isValidId(sessionId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'userId',
+                         'userEmail',
+                         'activationKey',
+                         'ipAddress',
+                         'hardwareId',
+                         'consentStatus',
+                         'createdAt',
+                         'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId',
+                         'userEmail',
+                         'activationKey',
+                         'ipAddress',
+                         'hardwareId',
+                         'consentStatus',
+                         'createdAt',
+                         'updatedAt'
+                       ]) &&
+                       isValidLoginSession(incoming());
+
+      allow update: if false;
+
+      allow delete: if isSignedIn() && isValidId(sessionId) &&
+                       (existing().userId == request.auth.uid || isAdmin());
+    }
+  }
+}
